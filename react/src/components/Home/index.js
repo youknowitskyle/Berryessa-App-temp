@@ -137,15 +137,6 @@ const MessageList = ({
   </ul>
 );
 
-// const MessageItem = ({ message, onRemoveMessage }) => (
-//   <li>
-//     <strong>{message.username}</strong> {message.text}
-//     <button type="button" onClick={() => onRemoveMessage(message.uid)}>
-//       Delete
-//     </button>
-//   </li>
-// );
-
 class MessageItem extends Component {
   constructor(props) {
     super(props);
