@@ -16,6 +16,7 @@ const ModeratorPage = () => (
     <h1>Moderator</h1>
     <p>The Moderator Page is accessible by every signed in moderator user.</p>
 
+    <h2>Announcements</h2>
     <Announcements />
   </div>
 );
@@ -25,6 +26,7 @@ class AnnouncementsBase extends Component {
     super(props);
 
     this.state = {
+      title: "",
       text: "",
       loading: false,
       announcement: []
@@ -35,15 +37,20 @@ class AnnouncementsBase extends Component {
     this.setState({ text: event.target.value });
   };
 
+  onChangeTitle = event => {
+    this.setState({ title: event.target.value });
+  };
+
   onCreateAnnouncement = (event, authUser) => {
     this.props.firebase.announcements().push({
+      title: this.state.title,
       text: this.state.text,
       userId: authUser.uid,
       createdAt: this.props.firebase.serverValue.TIMESTAMP,
       username: authUser.username
     });
 
-    this.setState({ text: "" });
+    this.setState({ title: "", text: "" });
 
     event.preventDefault();
   };
@@ -79,18 +86,19 @@ class AnnouncementsBase extends Component {
     this.props.firebase.announcement(uid).remove();
   };
 
-  onEditAnnouncement = (announcement, text) => {
+  onEditAnnouncement = (announcement, title, text) => {
     const { uid, ...announcementSnapshot } = announcement;
 
     this.props.firebase.announcement(announcement.uid).set({
       ...announcementSnapshot,
+      title,
       text,
       editedAt: this.props.firebase.serverValue.TIMESTAMP
     });
   };
 
   render() {
-    const { text, announcements, loading } = this.state;
+    const { title, text, announcements, loading } = this.state;
 
     return (
       <AuthUserContext.Consumer>
@@ -112,7 +120,18 @@ class AnnouncementsBase extends Component {
             <form
               onSubmit={event => this.onCreateAnnouncement(event, authUser)}
             >
-              <input type="text" value={text} onChange={this.onChangeText} />
+              <input
+                type="text"
+                value={title}
+                placeholder="Title"
+                onChange={this.onChangeTitle}
+              />
+              <input
+                type="text"
+                value={text}
+                placeholder="Body"
+                onChange={this.onChangeText}
+              />
               <button type="submit">Send</button>
             </form>
           </div>
@@ -147,6 +166,7 @@ class AnnouncementItem extends Component {
 
     this.state = {
       editMode: false,
+      editTitle: this.props.announcement.title,
       editText: this.props.announcement.text
     };
   }
@@ -154,6 +174,7 @@ class AnnouncementItem extends Component {
   onToggleEditMode = () => {
     this.setState(state => ({
       editMode: !state.editMode,
+      editTitle: this.props.announcement.title,
       editText: this.props.announcement.text
     }));
   };
@@ -162,51 +183,65 @@ class AnnouncementItem extends Component {
     this.setState({ editText: event.target.value });
   };
 
+  onChangeEditTitle = event => {
+    this.setState({ editTitle: event.target.value });
+  };
+
   onSaveEditText = () => {
-    this.props.onEditAnnouncement(this.props.announcement, this.state.editText);
+    this.props.onEditAnnouncement(
+      this.props.announcement,
+      this.state.editTitle,
+      this.state.editText
+    );
 
     this.setState({ editMode: false });
   };
 
   render() {
     const { authUser, announcement, onRemoveAnnouncement } = this.props;
-    const { editMode, editText } = this.state;
+    const { editMode, editTitle, editText } = this.state;
 
     return (
       <li>
         {editMode ? (
-          <input
-            type="text"
-            value={editText}
-            onChange={this.onChangeEditText}
-          />
+          <React.Fragment>
+            <input
+              type="text"
+              value={editTitle}
+              onChange={this.onChangeEditTitle}
+            />
+            <input
+              type="text"
+              value={editText}
+              onChange={this.onChangeEditText}
+            />
+          </React.Fragment>
         ) : (
           <span>
-            <strong>{announcement.username}</strong> {announcement.text}
+            <strong>{announcement.title}</strong> {announcement.text} (Posted by{" "}
+            {announcement.username})
             {announcement.editedAt && <span> (Edited) </span>}
           </span>
         )}
-        {authUser.uid === announcement.userId && (
-          <span>
-            {editMode ? (
-              <span>
-                <button onClick={this.onSaveEditText}>Save</button>
-                <button onClick={this.onToggleEditMode}>Reset</button>
-              </span>
-            ) : (
-              <button onClick={this.onToggleEditMode}>Edit</button>
-            )}
+        <span>
+          {editMode ? (
+            <span>
+              <button onClick={this.onSaveEditText}>Save</button>
+              <button onClick={this.onToggleEditMode}>Cancel</button>
+            </span>
+          ) : (
+            <button onClick={this.onToggleEditMode}>Edit</button>
+          )}
 
-            {!editMode && (
-              <button
-                type="button"
-                onClick={() => onRemoveAnnouncement(announcement.uid)}
-              >
-                Delete
-              </button>
-            )}
-          </span>
-        )}
+          {!editMode && (
+            <button
+              type="button"
+              onClick={() => onRemoveAnnouncement(announcement.uid)}
+            >
+              Delete
+            </button>
+          )}
+        </span>
       </li>
     );
   }

@@ -15,8 +15,111 @@ const HomePage = () => (
     <p>You are authenticated.</p>
 
     <Messages />
+
+    <br />
+    <h2>Announcements</h2>
+    <Announcements />
   </div>
 );
+
+class AnnouncementsBase extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      title: "",
+      text: "",
+      loading: false,
+      announcement: []
+    };
+  }
+
+  componentDidMount() {
+    this.setState({ loading: true });
+
+    this.props.firebase.announcements().on("value", snapshot => {
+      const announcementObject = snapshot.val();
+
+      if (announcementObject) {
+        const announcementList = Object.keys(announcementObject).map(key => ({
+          ...announcementObject[key],
+          uid: key
+        }));
+        this.setState({
+          announcements: announcementList,
+          loading: false
+        });
+      } else {
+        this.setState({ announcements: null, loading: false });
+      }
+
+      this.setState({ loading: false });
+    });
+  }
+
+  componentWillUnmount() {
+    this.props.firebase.announcements().off();
+  }
+
+  render() {
+    const { title, text, announcements, loading } = this.state;
+
+    return (
+      <AuthUserContext.Consumer>
+        {authUser => (
+          <div>
+            {loading && <div>Loading ...</div>}
+
+            {announcements ? (
+              <AnnouncementList
+                authUser={authUser}
+                announcements={announcements}
+              />
+            ) : (
+              <div>There are no announcements...</div>
+            )}
+          </div>
+        )}
+      </AuthUserContext.Consumer>
+    );
+  }
+}
+
+const AnnouncementList = ({ authUser, announcements }) => (
+  <ul>
+    {announcements.map(announcement => (
+      <AnnouncementItem
+        authUser={authUser}
+        key={announcement.uid}
+        announcement={announcement}
+      />
+    ))}
+  </ul>
+);
+
+class AnnouncementItem extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {};
+  }
+
+  render() {
+    const { authUser, announcement } = this.props;
+
+    return (
+      <li>
+        {
+          <span>
+            <strong>{announcement.title}</strong> {announcement.text} (Posted by{" "}
+            {announcement.username})
+            {announcement.editedAt && <span> (Edited) </span>}
+          </span>
+        }
+      </li>
+    );
+  }
+}
 
 class MessagesBase extends Component {
   constructor(props) {
@@ -209,6 +312,7 @@ class MessageItem extends Component {
 }
 
 const Messages = withFirebase(MessagesBase);
+const Announcements = withFirebase(AnnouncementsBase);
 
 const condition = authUser => !!authUser;
 
