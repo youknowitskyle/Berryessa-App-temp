@@ -54,7 +54,8 @@ class AnnouncementsBase extends Component {
       text: "",
       endDate: "",
       loading: false,
-      announcement: []
+      announcement: [],
+      error: false
     };
   }
 
@@ -67,11 +68,16 @@ class AnnouncementsBase extends Component {
   };
 
   handleDateChange = date => {
-    this.setState({ endDate: date });
+    if (Date.parse(date) > Date.now()) {
+      this.setState({ endDate: date, error: false });
+    } else {
+      this.setState({ error: true });
+    }
   };
 
   onCreateAnnouncement = (event, authUser) => {
     const dateHolder = Date.parse(this.state.endDate);
+
     this.props.firebase.announcements().push({
       title: this.state.title,
       text: this.state.text,
@@ -80,7 +86,6 @@ class AnnouncementsBase extends Component {
       createdAt: this.props.firebase.serverValue.TIMESTAMP,
       username: authUser.username
     });
-
     this.setState({ title: "", text: "", endDate: "" });
 
     event.preventDefault();
@@ -97,8 +102,14 @@ class AnnouncementsBase extends Component {
           ...announcementObject[key],
           uid: key
         }));
+        announcementList.forEach(item => {
+          console.log(item.endDate);
+        });
+        const filteredAnnouncements = announcementList.filter(item => {
+          return parseInt(item.endDate) > Date.now();
+        });
         this.setState({
-          announcements: announcementList,
+          announcements: filteredAnnouncements,
           loading: false
         });
       } else {
@@ -171,6 +182,9 @@ class AnnouncementsBase extends Component {
                 onChange={this.handleDateChange}
               />
               <button type="submit">Send</button>
+              {this.state.error && (
+                <div style={{ color: "red" }}>Please enter a valid date.</div>
+              )}
             </form>
           </div>
         )}

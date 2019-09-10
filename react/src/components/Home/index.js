@@ -128,7 +128,8 @@ class MessagesBase extends Component {
     this.state = {
       text: "",
       loading: false,
-      message: []
+      message: [],
+      limit: 5
     };
   }
 
@@ -137,6 +138,8 @@ class MessagesBase extends Component {
   };
 
   onCreateMessage = (event, authUser) => {
+    console.log(this.state.limit);
+
     this.props.firebase.messages().push({
       text: this.state.text,
       userId: authUser.uid,
@@ -150,26 +153,32 @@ class MessagesBase extends Component {
   };
 
   componentDidMount() {
-    this.setState({ loading: true });
+    this.onListenForMessages();
+  }
 
-    this.props.firebase.messages().on("value", snapshot => {
-      const messageObject = snapshot.val();
+  onListenForMessages() {
+    this.props.firebase
+      .messages()
+      .orderByChild("createdAt")
+      .limitToLast(this.state.limit)
+      .on("value", snapshot => {
+        const messageObject = snapshot.val();
 
-      if (messageObject) {
-        const messageList = Object.keys(messageObject).map(key => ({
-          ...messageObject[key],
-          uid: key
-        }));
-        this.setState({
-          messages: messageList,
-          loading: false
-        });
-      } else {
-        this.setState({ messages: null, loading: false });
-      }
+        if (messageObject) {
+          const messageList = Object.keys(messageObject).map(key => ({
+            ...messageObject[key],
+            uid: key
+          }));
+          this.setState({
+            messages: messageList,
+            loading: false
+          });
+        } else {
+          this.setState({ messages: null, loading: false });
+        }
 
-      this.setState({ loading: false });
-    });
+        this.setState({ loading: false });
+      });
   }
 
   componentWillUnmount() {
@@ -190,6 +199,13 @@ class MessagesBase extends Component {
     });
   };
 
+  onMore = () => {
+    this.setState(
+      state => ({ limit: state.limit + 5 }),
+      this.onListenForMessages
+    );
+  };
+
   render() {
     const { text, messages, loading } = this.state;
 
@@ -197,6 +213,14 @@ class MessagesBase extends Component {
       <AuthUserContext.Consumer>
         {authUser => (
           <div>
+            {!loading && messages && (
+              <React.Fragment>
+                <button type="button" onClick={this.onMore}>
+                  More
+                </button>
+              </React.Fragment>
+            )}
+
             {loading && <div>Loading ...</div>}
 
             {messages ? (
