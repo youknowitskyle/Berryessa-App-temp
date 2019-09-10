@@ -1,4 +1,12 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+﻿This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Project Dependencies
+
+Node Package Management or Yarn
+
+react
+recompose
+firebase
 
 ## Available Scripts
 
