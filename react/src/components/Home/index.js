@@ -271,6 +271,8 @@ class MessageItem extends Component {
     const { authUser, message, onRemoveMessage } = this.props;
     const { editMode, editText } = this.state;
 
+    const time = new Date(parseInt(message.editedAt)).toUTCString();
+
     return (
       <li>
         {editMode ? (
@@ -282,7 +284,7 @@ class MessageItem extends Component {
         ) : (
           <span>
             <strong>{message.username}</strong> {message.text}
-            {message.editedAt && <span> (Edited) </span>}
+            {message.editedAt && <span> (Edited at {time}) </span>}
           </span>
         )}
         {authUser.uid === message.userId && (

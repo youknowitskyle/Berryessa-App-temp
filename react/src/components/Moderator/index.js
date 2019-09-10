@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import { compose } from "recompose";
+import DatePicker from "react-datepicker";
 
 import { withFirebase } from "../Firebase";
 import {
@@ -10,6 +11,7 @@ import {
 } from "../Session";
 import * as ROLES from "../../constants/roles";
 import * as ROUTES from "../../constants/routes";
+import "react-datepicker/dist/react-datepicker.css";
 
 const ModeratorPage = () => (
   <div>
@@ -18,8 +20,30 @@ const ModeratorPage = () => (
 
     <h2>Announcements</h2>
     <Announcements />
+    <Example />
   </div>
 );
+
+class Example extends Component {
+  state = {
+    startDate: new Date()
+  };
+
+  handleChange = date => {
+    this.setState({
+      startDate: date
+    });
+  };
+
+  render() {
+    return (
+      <DatePicker
+        selected={this.state.startDate}
+        onChange={this.handleChange}
+      />
+    );
+  }
+}
 
 class AnnouncementsBase extends Component {
   constructor(props) {
@@ -28,6 +52,7 @@ class AnnouncementsBase extends Component {
     this.state = {
       title: "",
       text: "",
+      endDate: "",
       loading: false,
       announcement: []
     };
@@ -41,16 +66,22 @@ class AnnouncementsBase extends Component {
     this.setState({ title: event.target.value });
   };
 
+  handleDateChange = date => {
+    this.setState({ endDate: date });
+  };
+
   onCreateAnnouncement = (event, authUser) => {
+    const dateHolder = Date.parse(this.state.endDate);
     this.props.firebase.announcements().push({
       title: this.state.title,
       text: this.state.text,
+      endDate: dateHolder,
       userId: authUser.uid,
       createdAt: this.props.firebase.serverValue.TIMESTAMP,
       username: authUser.username
     });
 
-    this.setState({ title: "", text: "" });
+    this.setState({ title: "", text: "", endDate: "" });
 
     event.preventDefault();
   };
@@ -86,19 +117,21 @@ class AnnouncementsBase extends Component {
     this.props.firebase.announcement(uid).remove();
   };
 
-  onEditAnnouncement = (announcement, title, text) => {
+  onEditAnnouncement = (announcement, title, text, dateHolder) => {
     const { uid, ...announcementSnapshot } = announcement;
+    const endDate = Date.parse(dateHolder);
 
     this.props.firebase.announcement(announcement.uid).set({
       ...announcementSnapshot,
       title,
       text,
+      endDate,
       editedAt: this.props.firebase.serverValue.TIMESTAMP
     });
   };
 
   render() {
-    const { title, text, announcements, loading } = this.state;
+    const { title, text, endDate, announcements, loading } = this.state;
 
     return (
       <AuthUserContext.Consumer>
@@ -131,6 +164,11 @@ class AnnouncementsBase extends Component {
                 value={text}
                 placeholder="Body"
                 onChange={this.onChangeText}
+              />
+              <DatePicker
+                selected={this.state.endDate}
+                onSelect={this.handleDateChange}
+                onChange={this.handleDateChange}
               />
               <button type="submit">Send</button>
             </form>
@@ -167,7 +205,8 @@ class AnnouncementItem extends Component {
     this.state = {
       editMode: false,
       editTitle: this.props.announcement.title,
-      editText: this.props.announcement.text
+      editText: this.props.announcement.text,
+      editDate: this.props.announcement.endDate
     };
   }
 
@@ -175,7 +214,8 @@ class AnnouncementItem extends Component {
     this.setState(state => ({
       editMode: !state.editMode,
       editTitle: this.props.announcement.title,
-      editText: this.props.announcement.text
+      editText: this.props.announcement.text,
+      editDate: this.props.announcement.endDate
     }));
   };
 
@@ -187,11 +227,16 @@ class AnnouncementItem extends Component {
     this.setState({ editTitle: event.target.value });
   };
 
+  onChangeDate = event => {
+    this.setState({ editDate: event });
+  };
+
   onSaveEditText = () => {
     this.props.onEditAnnouncement(
       this.props.announcement,
       this.state.editTitle,
-      this.state.editText
+      this.state.editText,
+      this.state.editDate
     );
 
     this.setState({ editMode: false });
@@ -214,6 +259,11 @@ class AnnouncementItem extends Component {
               type="text"
               value={editText}
               onChange={this.onChangeEditText}
+            />
+            <DatePicker
+              selected={this.state.endDate}
+              onSelect={this.onChangeDate}
+              onChange={this.onChangeDate}
             />
           </React.Fragment>
         ) : (
