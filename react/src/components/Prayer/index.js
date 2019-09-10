@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { compose } from "recompose";
 
 import { AuthUserContext, withAuthorization } from "../Session";
 import { withFirebase } from "../Firebase";
@@ -13,11 +12,6 @@ const PrayerPage = () => (
     <Prayers />
   </div>
 );
-
-const INITIAL_STATE = {
-  request: "",
-  error: null
-};
 
 class PrayersBase extends Component {
   constructor(props) {
