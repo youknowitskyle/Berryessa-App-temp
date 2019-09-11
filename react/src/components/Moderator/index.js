@@ -20,30 +20,8 @@ const ModeratorPage = () => (
 
     <h2>Announcements</h2>
     <Announcements />
-    <Example />
   </div>
 );
-
-class Example extends Component {
-  state = {
-    startDate: new Date()
-  };
-
-  handleChange = date => {
-    this.setState({
-      startDate: date
-    });
-  };
-
-  render() {
-    return (
-      <DatePicker
-        selected={this.state.startDate}
-        onChange={this.handleChange}
-      />
-    );
-  }
-}
 
 class AnnouncementsBase extends Component {
   constructor(props) {
@@ -102,9 +80,6 @@ class AnnouncementsBase extends Component {
           ...announcementObject[key],
           uid: key
         }));
-        announcementList.forEach(item => {
-          console.log(item.endDate);
-        });
         const filteredAnnouncements = announcementList.filter(item => {
           return parseInt(item.endDate) > Date.now();
         });
