@@ -18,7 +18,7 @@ const INITIAL_STATE = {
   email: "",
   passwordOne: "",
   passwordTwo: "",
-  isAdmin: false,
+  isParent: false,
   error: null
 };
 
@@ -39,12 +39,12 @@ class SignUpFormBase extends Component {
   }
 
   onSubmit = event => {
-    const { username, email, passwordOne, isAdmin } = this.state;
+    const { username, email, passwordOne, isParent } = this.state;
 
     const roles = {};
 
-    if (isAdmin) {
-      roles[ROLES.ADMIN] = ROLES.ADMIN;
+    if (isParent) {
+      roles[ROLES.PARENT] = ROLES.PARENT;
     }
 
     this.props.firebase
@@ -86,7 +86,7 @@ class SignUpFormBase extends Component {
       email,
       passwordOne,
       passwordTwo,
-      isAdmin,
+      isParent,
       error
     } = this.state;
 
@@ -127,11 +127,11 @@ class SignUpFormBase extends Component {
           placeholder="Confirm Password"
         />
         <label>
-          Admin:
+          Parent:
           <input
-            name="isAdmin"
+            name="isParent"
             type="checkbox"
-            checked={isAdmin}
+            checked={isParent}
             onChange={this.onChangeCheckbox}
           />
         </label>

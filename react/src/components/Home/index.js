@@ -7,6 +7,7 @@ import {
   withEmailVerification
 } from "../Session";
 import { withFirebase } from "../Firebase";
+import * as ROLES from "../../constants/roles";
 import { tsImportEqualsDeclaration } from "@babel/types";
 
 const HomePage = () => (
@@ -17,8 +18,30 @@ const HomePage = () => (
     <Messages />
 
     <br />
-    <h2>Announcements</h2>
-    <Announcements />
+
+    <AuthUserContext.Consumer>
+      {authUser => (
+        <div>
+          {authUser.roles[ROLES.APPROVED] ? (
+            <div>
+              <h2>Announcements</h2>
+              <Announcements />
+            </div>
+          ) : (
+            <div>
+              You are not allowed to view announcements yet. Please contact an
+              administrator to get approved. If you think you have been
+              approved, try logging out and signing back in.
+            </div>
+          )}
+        </div>
+      )}
+    </AuthUserContext.Consumer>
+
+    {/* <div>
+      <h2>Announcements</h2>
+      <Announcements />
+    </div> */}
   </div>
 );
 
@@ -45,8 +68,11 @@ class AnnouncementsBase extends Component {
           ...announcementObject[key],
           uid: key
         }));
+        const filteredAnnouncements = announcementList.filter(item => {
+          return parseInt(item.endDate) > Date.now();
+        });
         this.setState({
-          announcements: announcementList,
+          announcements: filteredAnnouncements,
           loading: false
         });
       } else {

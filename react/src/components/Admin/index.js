@@ -69,7 +69,15 @@ class UserListBase extends Component {
                 <strong> | E-Mail:</strong> {user.email}
               </span>
               <span>
-                <strong> | Username:</strong> {user.username} |
+                <strong> | Username:</strong> {user.username}
+              </span>
+              <span>
+                <strong> | Approved: </strong>{" "}
+                {user.roles.APPROVED ? (
+                  <div style={{ color: "green" }}>TRUE</div>
+                ) : (
+                  <div style={{ color: "red" }}>FALSE</div>
+                )}
               </span>
               <span>
                 <Link
@@ -98,12 +106,18 @@ class UserItemBase extends Component {
       loading: false,
       user: null,
       sentReset: false,
+      approved: false,
       ...props.location.state
     };
   }
 
   componentDidMount() {
+    console.log("hello");
+
     if (this.state.user) {
+      this.setState({
+        approved: this.state.user.roles.APPROVED
+      });
       return;
     }
 
@@ -114,9 +128,14 @@ class UserItemBase extends Component {
       .on("value", snapshot => {
         this.setState({
           user: snapshot.val(),
-          loading: false
+          loading: false,
+          approved: snapshot.val().roles.APPROVED
         });
       });
+
+    this.setState({
+      approved: this.state.user.roles.APPROVED
+    });
   }
 
   componentWillUnmount() {
@@ -127,6 +146,16 @@ class UserItemBase extends Component {
     this.props.firebase.doPasswordReset(this.state.user.email);
     this.setState({
       sentReset: true
+    });
+  };
+
+  onApproveUser = () => {
+    this.props.firebase.db
+      .ref(`users/${this.props.match.params.id}/roles/`)
+      .update({ APPROVED: "APPROVED" });
+
+    this.setState({
+      approved: true
     });
   };
 
@@ -148,6 +177,13 @@ class UserItemBase extends Component {
             </span>
             <span>
               <strong> | Username:</strong> {user.username}
+            </span>
+            <span>
+              {!this.state.approved && (
+                <button type="button" onClick={this.onApproveUser}>
+                  Approve User
+                </button>
+              )}
             </span>
             <span>
               <button type="button" onClick={this.onSendPasswordResetEmail}>
