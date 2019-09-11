@@ -78,6 +78,7 @@ class UserListBase extends Component {
                     state: { user }
                   }}
                 >
+                  {" "}
                   Details
                 </Link>
               </span>
