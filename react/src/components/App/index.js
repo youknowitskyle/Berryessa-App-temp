@@ -10,9 +10,9 @@ import HomePage from "../Home";
 import AccountPage from "../Account";
 import AdminPage from "../Admin";
 import PermissionDenied from "../Denied";
+import PrayerPage from "../Prayer";
 import ModeratorPage from "../Moderator";
 
-// import PrayerPage from "../Prayer";
 import { AuthUserContext } from "../Session";
 
 import * as ROUTES from "../../constants/routes";
@@ -34,7 +34,7 @@ const App = () => (
       <Route path={ROUTES.ADMIN} component={AdminPage} />
       <Route path={ROUTES.MODERATOR} component={ModeratorPage} />
       <Route path={ROUTES.DENIED} component={PermissionDenied} />
-      {/* <Route path={ROUTES.PRAYER} component={PrayerPage} /> */}
+      <Route path={ROUTES.PRAYER} component={PrayerPage} />
     </div>
   </Router>
 );
