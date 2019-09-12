@@ -1,7 +1,11 @@
 import React, { Component } from "react";
+import Popup from "reactjs-popup";
+
+import styles from "./styles.css";
 
 import { AuthUserContext, withAuthorization } from "../Session";
 import { withFirebase } from "../Firebase";
+import Replies from "./reply";
 
 import * as ROLES from "../../constants/roles";
 
@@ -19,9 +23,11 @@ class PrayersBase extends Component {
 
     this.state = {
       text: "",
+      isAnonymous: false,
       loading: false,
       prayers: [],
-      limit: 5
+      limit: 5,
+      reply: null //becomes id of message
     };
   }
 
@@ -64,11 +70,16 @@ class PrayersBase extends Component {
     this.setState({ text: event.target.value });
   };
 
+  onChangeCheckbox = event => {
+    this.setState({ [event.target.name]: event.target.checked });
+  };
+
   onCreatePrayer = (event, authUser) => {
     this.props.firebase.prayers().push({
       text: this.state.text,
       userId: authUser.uid,
       username: authUser.username,
+      isAnonymous: this.state.isAnonymous,
       createdAt: this.props.firebase.serverValue.TIMESTAMP
     });
 
@@ -99,7 +110,7 @@ class PrayersBase extends Component {
   };
 
   render() {
-    const { text, prayers, loading } = this.state;
+    const { text, isAnonymous, prayers, loading } = this.state;
 
     const isInvalid = text === "";
 
@@ -124,7 +135,7 @@ class PrayersBase extends Component {
                 onRemovePrayer={this.onRemovePrayer}
               />
             ) : (
-              <div>There are no prayers ...</div>
+              <div>There are no prayer requests ...</div>
             )}
 
             <form onSubmit={event => this.onCreatePrayer(event, authUser)}>
@@ -135,6 +146,15 @@ class PrayersBase extends Component {
                 onChange={this.onChangeText}
                 placeholder="Send a prayer request..."
               />
+              <label>
+                Send Anonymously:{" "}
+                <input
+                  name="isAnonymous"
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={this.onChangeCheckbox}
+                />{" "}
+              </label>
               <button disabled={isInvalid} type="submit">
                 Send
               </button>
@@ -208,30 +228,72 @@ class PrayerItem extends Component {
           />
         ) : (
           <span>
-            <strong>{prayer.username}</strong> {prayer.text}
-            {console.log(prayer)}
+            <strong>
+              {prayer.isAnonymous ? "Anonymous" : prayer.username}:{" "}
+            </strong>
+            {prayer.text}
             {prayer.editedAt && <span>(Edited)</span>}
           </span>
         )}
         {authUser.uid === prayer.userId && (
-          <span>
+          <Popup
+            trigger={open => (
+              <button className="button">{open ? "Close" : ":"}</button>
+            )}
+            position="right top"
+            closeOnDocumentClick
+          >
             {editMode ? (
-              <span>
-                <button disabled={isInvalid} onClick={this.onSaveEditText}>
+              <span className="card">
+                <button
+                  className="menu-item"
+                  type="button"
+                  disabled={isInvalid}
+                  onClick={this.onSaveEditText}
+                >
                   Save
                 </button>
-                <button onClick={this.onToggleEditMode}>Reset</button>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={this.onToggleEditMode}
+                >
+                  Reset
+                </button>
               </span>
             ) : (
-              <button onClick={this.onToggleEditMode}>Edit</button>
+              <span className="card">
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={this.onToggleEditMode}
+                >
+                  Edit
+                </button>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => onRemovePrayer(prayer.uid)}
+                >
+                  Delete
+                </button>
+              </span>
             )}
-            {!editMode && (
-              <button type="button" onClick={() => onRemovePrayer(prayer.uid)}>
-                Delete
-              </button>
-            )}
-          </span>
+          </Popup>
         )}
+        <Popup
+          trigger={<button className="button">Reply</button>}
+          modal
+          closeOnDocumentClick
+        >
+          <div>
+            <span>
+              User: {prayer.isAnonymous ? "Anonymous" : prayer.username}
+            </span>
+            <h1>{prayer.text}</h1>
+            <Replies prayer={prayer} />
+          </div>
+        </Popup>
       </li>
     );
   }
