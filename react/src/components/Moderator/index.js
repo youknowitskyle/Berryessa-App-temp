@@ -151,10 +151,12 @@ class AnnouncementsBase extends Component {
                 placeholder="Body"
                 onChange={this.onChangeText}
               />
+              <span style={{ padding: "3px" }}>Expiration Date: </span>
               <DatePicker
                 selected={this.state.endDate}
                 onSelect={this.handleDateChange}
                 onChange={this.handleDateChange}
+                calendarAriaLabel="Expiration Date"
               />
               <button type="submit">Send</button>
               {this.state.error && (
