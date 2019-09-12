@@ -69,10 +69,26 @@ class UserListBase extends Component {
                 <strong> | E-Mail:</strong> {user.email}
               </span>
               <span>
-                <strong> | Username:</strong> {user.username} |
+                <strong> | Username:</strong> {user.username}
               </span>
               <span>
-                <Link to={`${ROUTES.ADMIN}/${user.uid}`}> Details</Link>
+                <strong> | Approved: </strong>{" "}
+                {user.roles.APPROVED ? (
+                  <div style={{ color: "green" }}>TRUE</div>
+                ) : (
+                  <div style={{ color: "red" }}>FALSE</div>
+                )}
+              </span>
+              <span>
+                <Link
+                  to={{
+                    pathname: `${ROUTES.ADMIN}/${user.uid}`,
+                    state: { user }
+                  }}
+                >
+                  {" "}
+                  Details
+                </Link>
               </span>
             </li>
           ))}
@@ -82,15 +98,118 @@ class UserListBase extends Component {
   }
 }
 
+class UserItemBase extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: false,
+      user: null,
+      sentReset: false,
+      approved: false,
+      ...props.location.state
+    };
+  }
+
+  componentDidMount() {
+    console.log("hello");
+
+    if (this.state.user) {
+      this.setState({
+        approved: this.state.user.roles.APPROVED
+      });
+      return;
+    }
+
+    this.setState({ loading: true });
+
+    this.props.firebase
+      .user(this.props.match.params.id)
+      .on("value", snapshot => {
+        this.setState({
+          user: snapshot.val(),
+          loading: false,
+          approved: snapshot.val().roles.APPROVED
+        });
+      });
+
+    this.setState({
+      approved: this.state.user.roles.APPROVED
+    });
+  }
+
+  componentWillUnmount() {
+    this.props.firebase.user(this.props.match.params.id).off();
+  }
+
+  onSendPasswordResetEmail = () => {
+    this.props.firebase.doPasswordReset(this.state.user.email);
+    this.setState({
+      sentReset: true
+    });
+  };
+
+  onApproveUser = () => {
+    this.props.firebase.db
+      .ref(`users/${this.props.match.params.id}/roles/`)
+      .update({ APPROVED: "APPROVED" });
+
+    this.setState({
+      approved: true
+    });
+  };
+
+  render() {
+    const { user, loading } = this.state;
+
+    return (
+      <div>
+        <h2>User ({this.props.match.params.id})</h2>
+        {loading && <div>Loading ...</div>}
+
+        {user && (
+          <div>
+            <span>
+              <strong>ID: </strong> {this.props.match.params.id}
+            </span>
+            <span>
+              <strong> | E-Mail:</strong> {user.email}
+            </span>
+            <span>
+              <strong> | Username:</strong> {user.username}
+            </span>
+            <span>
+              {!this.state.approved && (
+                <button type="button" onClick={this.onApproveUser}>
+                  Approve User
+                </button>
+              )}
+            </span>
+            <span>
+              <button type="button" onClick={this.onSendPasswordResetEmail}>
+                Send Password Reset
+              </button>
+              {this.state.sentReset && (
+                <div style={{ color: "red" }}>Password reset sent</div>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
 const condition = authUser => authUser && !!authUser.roles[ROLES.ADMIN];
 
 const UserList = withFirebase(UserListBase);
+const UserItem = withFirebase(UserItemBase);
 
-const UserItem = ({ match }) => (
+/*const UserItem = ({ match }) => (
   <div>
     <h2>User ({match.params.id})</h2>
   </div>
-);
+);*/
 
 export default compose(
   withAuthorization(condition),

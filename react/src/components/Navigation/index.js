@@ -37,6 +37,11 @@ const NavigationAuth = ({ authUser }) => (
         <Link to={ROUTES.ADMIN}>Admin</Link>
       </li>
     )}
+    {(!!authUser.roles[ROLES.ADMIN] || !!authUser.roles[ROLES.MODERATOR]) && (
+      <li>
+        <Link to={ROUTES.MODERATOR}>Moderator</Link>
+      </li>
+    )}
     <li>
       <Link to={ROUTES.PRAYER}>Prayer Request</Link>
     </li>
