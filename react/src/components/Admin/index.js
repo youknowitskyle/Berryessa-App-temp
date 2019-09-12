@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import { compose } from "recompose";
+import Popup from "reactjs-popup";
 
 import { withFirebase } from "../Firebase";
 import { withAuthorization } from "../Session";
@@ -74,9 +75,17 @@ class UserListBase extends Component {
               <span>
                 <strong> | Approved: </strong>{" "}
                 {user.roles.APPROVED ? (
-                  <div style={{ color: "green" }}>TRUE</div>
+                  <span style={{ color: "green" }}>TRUE</span>
                 ) : (
-                  <div style={{ color: "red" }}>FALSE</div>
+                  <span style={{ color: "red" }}>FALSE</span>
+                )}
+              </span>
+              <span>
+                <strong> | Parent: </strong>{" "}
+                {user.roles.PARENT ? (
+                  <span style={{ color: "green" }}>TRUE</span>
+                ) : (
+                  <span style={{ color: "red" }}>FALSE</span>
                 )}
               </span>
               <span>
@@ -107,6 +116,8 @@ class UserItemBase extends Component {
       user: null,
       sentReset: false,
       approved: false,
+      banned: false,
+      probation: false,
       ...props.location.state
     };
   }
@@ -116,7 +127,9 @@ class UserItemBase extends Component {
 
     if (this.state.user) {
       this.setState({
-        approved: this.state.user.roles.APPROVED
+        approved: this.state.user.roles.APPROVED,
+        banned: this.state.user.roles.BANNED,
+        probation: this.state.user.roles.PROBATION
       });
       return;
     }
@@ -129,12 +142,16 @@ class UserItemBase extends Component {
         this.setState({
           user: snapshot.val(),
           loading: false,
-          approved: snapshot.val().roles.APPROVED
+          approved: snapshot.val().roles.APPROVED,
+          banned: snapshot.val().roles.BANNED,
+          probation: snapshot.val().roles.PROBATION
         });
       });
 
     this.setState({
-      approved: this.state.user.roles.APPROVED
+      approved: this.state.user.roles.APPROVED,
+      banned: this.state.user.roles.BANNED,
+      probation: this.state.user.roles.PROBATION
     });
   }
 
@@ -147,6 +164,14 @@ class UserItemBase extends Component {
     this.setState({
       sentReset: true
     });
+  };
+
+  onBanUser = () => {
+    this.props.firebase.db
+      .ref(`users/${this.props.match.params.id}/roles/`)
+      .set({ BANNED: "BANNED" });
+
+    this.setState({ banned: true });
   };
 
   onApproveUser = () => {
@@ -178,20 +203,100 @@ class UserItemBase extends Component {
             <span>
               <strong> | Username:</strong> {user.username}
             </span>
-            <span>
+            <span style={{ padding: "5px" }}>
               {!this.state.approved && (
-                <button type="button" onClick={this.onApproveUser}>
+                <button
+                  type="button"
+                  onClick={this.onApproveUser}
+                  style={{
+                    backgroundColor: "green",
+                    color: "white"
+                  }}
+                >
                   Approve User
                 </button>
               )}
             </span>
-            <span>
+            {/* <span>
               <button type="button" onClick={this.onSendPasswordResetEmail}>
                 Send Password Reset
               </button>
               {this.state.sentReset && (
                 <div style={{ color: "red" }}>Password reset sent</div>
               )}
+            </span> */}
+            <span style={{ padding: "5px" }}>
+              <Popup
+                trigger={
+                  <button
+                    style={{
+                      backgroundColor: "fuchsia",
+                      color: "white"
+                    }}
+                  >
+                    Soft Ban
+                  </button>
+                }
+                modal
+                closeOnDocumentClick
+              >
+                <br />
+                <div style={{ textAlign: "center" }}>
+                  Are you sure you would like to put this user on probation?
+                  They will no longer be able to submit prayer requests and
+                  messages.
+                </div>
+                <br />
+                <div style={{ textAlign: "center" }}>
+                  <button
+                    type="button"
+                    onClick={this.onBanUser}
+                    style={{
+                      backgroundColor: "fuchsia",
+                      color: "white"
+                    }}
+                  >
+                    Soft Ban User
+                  </button>
+                </div>
+                <br />
+              </Popup>
+            </span>
+            <span style={{ padding: "5px" }}>
+              <Popup
+                trigger={
+                  <button
+                    style={{
+                      backgroundColor: "red",
+                      color: "white"
+                    }}
+                  >
+                    Ban User
+                  </button>
+                }
+                modal
+                closeOnDocumentClick
+              >
+                <br />
+                <div style={{ textAlign: "center" }}>
+                  Are you sure you would like to ban this user? This action is
+                  irreversible.
+                </div>
+                <br />
+                <div style={{ textAlign: "center" }}>
+                  <button
+                    type="button"
+                    onClick={this.onBanUser}
+                    style={{
+                      backgroundColor: "red",
+                      color: "white"
+                    }}
+                  >
+                    Ban User
+                  </button>
+                </div>
+                <br />
+              </Popup>
             </span>
           </div>
         )}

@@ -34,7 +34,6 @@ const App = () => (
       <Route path={ROUTES.ADMIN} component={AdminPage} />
       <Route path={ROUTES.MODERATOR} component={ModeratorPage} />
       <Route path={ROUTES.DENIED} component={PermissionDenied} />
-      {/* <Route path={ROUTES.PRAYER} component={PrayerPage} /> */}
     </div>
   </Router>
 );
