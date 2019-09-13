@@ -1,4 +1,14 @@
 
+﻿This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Project Dependencies
+
+Node Package Management or Yarn
+
+react
+recompose
+firebase
+
 # Berryessa App
 
 Berryessa App is a web app created with React and Firebase for scheduling, managing, and communicating in ROLCC youth cell groups.

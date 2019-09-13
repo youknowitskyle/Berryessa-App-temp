@@ -43,6 +43,9 @@ const NavigationAuth = ({ authUser }) => (
       </li>
     )}
     <li>
+      <Link to={ROUTES.PRAYER}>Prayer Request</Link>
+    </li>
+    <li>
       <SignOutButton />
     </li>
   </ul>
