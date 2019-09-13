@@ -89,6 +89,14 @@ class UserListBase extends Component {
                 )}
               </span>
               <span>
+                <strong> | Soft Banned: </strong>{" "}
+                {user.roles.PROBATION ? (
+                  <span style={{ color: "green" }}>TRUE</span>
+                ) : (
+                  <span style={{ color: "red" }}>FALSE</span>
+                )}
+              </span>
+              <span>
                 <Link
                   to={{
                     pathname: `${ROUTES.ADMIN}/${user.uid}`,
@@ -125,8 +133,6 @@ class UserItemBase extends Component {
   }
 
   componentDidMount() {
-    console.log("hello");
-
     if (this.state.user) {
       this.setState({
         approved: this.state.user.roles.APPROVED,
@@ -198,7 +204,7 @@ class UserItemBase extends Component {
 
     return (
       <div>
-        <h2>User ({this.props.match.params.id})</h2>
+        <h2>User: {user.username}</h2>
         {loading && <div>Loading ...</div>}
 
         {user && (
@@ -234,58 +240,80 @@ class UserItemBase extends Component {
                 <div style={{ color: "red" }}>Password reset sent</div>
               )}
             </span> */}
-
-            {!!this.state.approved && !this.state.banned && (
+            {this.state.probation && (
               <span style={{ padding: "5px" }}>
                 <button
                   type="button"
                   onClick={() => {
-                    this.setState({ openSoftBan: true });
+                    this.props.firebase.db
+                      .ref(
+                        `users/${this.props.match.params.id}/roles/PROBATION`
+                      )
+                      .remove();
+                    this.setState({ probation: false });
                   }}
-                  style={{
-                    backgroundColor: "fuchsia",
-                    color: "white"
-                  }}
+                  style={{ backgroundColor: "green", color: "white" }}
                 >
-                  Soft Ban
+                  Remove From Probation
                 </button>
-
-                <Popup
-                  modal
-                  closeOnDocumentClick
-                  open={this.state.openSoftBan}
-                  onClose={() => {
-                    this.setState({ openSoftBan: false });
-                  }}
-                >
-                  <br />
-                  <div style={{ textAlign: "center" }}>
-                    Are you sure you would like to put this user on probation?
-                    They will no longer be able to submit prayer requests and
-                    messages.
-                  </div>
-                  <br />
-                  <div style={{ textAlign: "center" }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        this.props.firebase.db
-                          .ref(`users/${this.props.match.params.id}/roles/`)
-                          .update({ PROBATION: "PROBATION" });
-                        this.setState({ probation: true, openSoftBan: false });
-                      }}
-                      style={{
-                        backgroundColor: "fuchsia",
-                        color: "white"
-                      }}
-                    >
-                      Soft Ban User
-                    </button>
-                  </div>
-                  <br />
-                </Popup>
               </span>
             )}
+            {!!this.state.approved &&
+              !this.state.banned &&
+              !this.state.probation && (
+                <span style={{ padding: "5px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      this.setState({ openSoftBan: true });
+                    }}
+                    style={{
+                      backgroundColor: "fuchsia",
+                      color: "white"
+                    }}
+                  >
+                    Soft Ban
+                  </button>
+
+                  <Popup
+                    modal
+                    closeOnDocumentClick
+                    open={this.state.openSoftBan}
+                    onClose={() => {
+                      this.setState({ openSoftBan: false });
+                    }}
+                  >
+                    <br />
+                    <div style={{ textAlign: "center" }}>
+                      Are you sure you would like to put this user on probation?
+                      They will no longer be able to submit prayer requests and
+                      messages.
+                    </div>
+                    <br />
+                    <div style={{ textAlign: "center" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          this.props.firebase.db
+                            .ref(`users/${this.props.match.params.id}/roles/`)
+                            .update({ PROBATION: "PROBATION" });
+                          this.setState({
+                            probation: true,
+                            openSoftBan: false
+                          });
+                        }}
+                        style={{
+                          backgroundColor: "fuchsia",
+                          color: "white"
+                        }}
+                      >
+                        Soft Ban User
+                      </button>
+                    </div>
+                    <br />
+                  </Popup>
+                </span>
+              )}
             <span>
               {this.state.banned ? (
                 <strong style={{ color: "red" }}>BANNED</strong>
