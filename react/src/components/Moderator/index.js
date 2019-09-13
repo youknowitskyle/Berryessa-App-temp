@@ -151,12 +151,24 @@ class AnnouncementsBase extends Component {
                 placeholder="Body"
                 onChange={this.onChangeText}
               />
+              <span style={{ padding: "3px" }}>Expiration Date: </span>
               <DatePicker
                 selected={this.state.endDate}
                 onSelect={this.handleDateChange}
                 onChange={this.handleDateChange}
+                calendarAriaLabel="Expiration Date"
               />
-              <button type="submit">Send</button>
+              <button
+                type="submit"
+                disabled={
+                  this.state.error ||
+                  !this.state.endDate ||
+                  !this.state.title ||
+                  !this.state.text
+                }
+              >
+                Send
+              </button>
               {this.state.error && (
                 <div style={{ color: "red" }}>Please enter a valid date.</div>
               )}
@@ -195,7 +207,8 @@ class AnnouncementItem extends Component {
       editMode: false,
       editTitle: this.props.announcement.title,
       editText: this.props.announcement.text,
-      editDate: this.props.announcement.endDate
+      editDate: this.props.announcement.endDate,
+      error: false
     };
   }
 
@@ -217,7 +230,11 @@ class AnnouncementItem extends Component {
   };
 
   onChangeDate = event => {
-    this.setState({ editDate: event });
+    if (Date.parse(event) > Date.now()) {
+      this.setState({ editDate: event, error: false });
+    } else {
+      this.setState({ error: true });
+    }
   };
 
   onSaveEditText = () => {
@@ -250,7 +267,7 @@ class AnnouncementItem extends Component {
               onChange={this.onChangeEditText}
             />
             <DatePicker
-              selected={this.state.endDate}
+              selected={this.state.editDate}
               onSelect={this.onChangeDate}
               onChange={this.onChangeDate}
             />
@@ -265,8 +282,21 @@ class AnnouncementItem extends Component {
         <span>
           {editMode ? (
             <span>
-              <button onClick={this.onSaveEditText}>Save</button>
+              <button
+                onClick={this.onSaveEditText}
+                disabled={
+                  this.state.error ||
+                  !this.state.editDate ||
+                  !this.state.editTitle ||
+                  !this.state.editText
+                }
+              >
+                Save
+              </button>
               <button onClick={this.onToggleEditMode}>Cancel</button>
+              {this.state.error && (
+                <div style={{ color: "red" }}>Please enter a valid date.</div>
+              )}
             </span>
           ) : (
             <button onClick={this.onToggleEditMode}>Edit</button>

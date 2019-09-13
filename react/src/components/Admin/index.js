@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import { compose } from "recompose";
+import Popup from "reactjs-popup";
 
 import { withFirebase } from "../Firebase";
 import { withAuthorization } from "../Session";
@@ -74,9 +75,25 @@ class UserListBase extends Component {
               <span>
                 <strong> | Approved: </strong>{" "}
                 {user.roles.APPROVED ? (
-                  <div style={{ color: "green" }}>TRUE</div>
+                  <span style={{ color: "green" }}>TRUE</span>
                 ) : (
-                  <div style={{ color: "red" }}>FALSE</div>
+                  <span style={{ color: "red" }}>FALSE</span>
+                )}
+              </span>
+              <span>
+                <strong> | Parent: </strong>{" "}
+                {user.roles.PARENT ? (
+                  <span style={{ color: "green" }}>TRUE</span>
+                ) : (
+                  <span style={{ color: "red" }}>FALSE</span>
+                )}
+              </span>
+              <span>
+                <strong> | Soft Banned: </strong>{" "}
+                {user.roles.PROBATION ? (
+                  <span style={{ color: "green" }}>TRUE</span>
+                ) : (
+                  <span style={{ color: "red" }}>FALSE</span>
                 )}
               </span>
               <span>
@@ -107,16 +124,20 @@ class UserItemBase extends Component {
       user: null,
       sentReset: false,
       approved: false,
+      banned: false,
+      probation: false,
+      openBan: false,
+      openSoftBan: false,
       ...props.location.state
     };
   }
 
   componentDidMount() {
-    console.log("hello");
-
     if (this.state.user) {
       this.setState({
-        approved: this.state.user.roles.APPROVED
+        approved: this.state.user.roles.APPROVED,
+        banned: this.state.user.roles.BANNED,
+        probation: this.state.user.roles.PROBATION
       });
       return;
     }
@@ -129,12 +150,16 @@ class UserItemBase extends Component {
         this.setState({
           user: snapshot.val(),
           loading: false,
-          approved: snapshot.val().roles.APPROVED
+          approved: snapshot.val().roles.APPROVED,
+          banned: snapshot.val().roles.BANNED,
+          probation: snapshot.val().roles.PROBATION
         });
       });
 
     this.setState({
-      approved: this.state.user.roles.APPROVED
+      approved: this.state.user.roles.APPROVED,
+      banned: this.state.user.roles.BANNED,
+      probation: this.state.user.roles.PROBATION
     });
   }
 
@@ -147,6 +172,21 @@ class UserItemBase extends Component {
     this.setState({
       sentReset: true
     });
+  };
+
+  onBanUser = () => {
+    this.props.firebase.db
+      .ref(`users/${this.props.match.params.id}/roles/`)
+      .set({ BANNED: "BANNED" });
+
+    this.setState({ banned: true });
+  };
+
+  onSoftBanUser = () => {
+    this.props.firebase.db
+      .ref(`users/${this.props.match.params.id}/roles/`)
+      .update({ PROBATION: "PROBATION" });
+    this.setState({ probation: true });
   };
 
   onApproveUser = () => {
@@ -164,7 +204,7 @@ class UserItemBase extends Component {
 
     return (
       <div>
-        <h2>User ({this.props.match.params.id})</h2>
+        <h2>User: {user.username}</h2>
         {loading && <div>Loading ...</div>}
 
         {user && (
@@ -178,19 +218,154 @@ class UserItemBase extends Component {
             <span>
               <strong> | Username:</strong> {user.username}
             </span>
-            <span>
-              {!this.state.approved && (
-                <button type="button" onClick={this.onApproveUser}>
+            <span style={{ padding: "5px" }}>
+              {!this.state.approved && !this.state.banned && (
+                <button
+                  type="button"
+                  onClick={this.onApproveUser}
+                  style={{
+                    backgroundColor: "green",
+                    color: "white"
+                  }}
+                >
                   Approve User
                 </button>
               )}
             </span>
-            <span>
+            {/* <span>
               <button type="button" onClick={this.onSendPasswordResetEmail}>
                 Send Password Reset
               </button>
               {this.state.sentReset && (
                 <div style={{ color: "red" }}>Password reset sent</div>
+              )}
+            </span> */}
+            {this.state.probation && (
+              <span style={{ padding: "5px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    this.props.firebase.db
+                      .ref(
+                        `users/${this.props.match.params.id}/roles/PROBATION`
+                      )
+                      .remove();
+                    this.setState({ probation: false });
+                  }}
+                  style={{ backgroundColor: "green", color: "white" }}
+                >
+                  Remove From Probation
+                </button>
+              </span>
+            )}
+            {!!this.state.approved &&
+              !this.state.banned &&
+              !this.state.probation && (
+                <span style={{ padding: "5px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      this.setState({ openSoftBan: true });
+                    }}
+                    style={{
+                      backgroundColor: "fuchsia",
+                      color: "white"
+                    }}
+                  >
+                    Soft Ban
+                  </button>
+
+                  <Popup
+                    modal
+                    closeOnDocumentClick
+                    open={this.state.openSoftBan}
+                    onClose={() => {
+                      this.setState({ openSoftBan: false });
+                    }}
+                  >
+                    <br />
+                    <div style={{ textAlign: "center" }}>
+                      Are you sure you would like to put this user on probation?
+                      They will no longer be able to submit prayer requests and
+                      messages.
+                    </div>
+                    <br />
+                    <div style={{ textAlign: "center" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          this.props.firebase.db
+                            .ref(`users/${this.props.match.params.id}/roles/`)
+                            .update({ PROBATION: "PROBATION" });
+                          this.setState({
+                            probation: true,
+                            openSoftBan: false
+                          });
+                        }}
+                        style={{
+                          backgroundColor: "fuchsia",
+                          color: "white"
+                        }}
+                      >
+                        Soft Ban User
+                      </button>
+                    </div>
+                    <br />
+                  </Popup>
+                </span>
+              )}
+            <span>
+              {this.state.banned ? (
+                <strong style={{ color: "red" }}>BANNED</strong>
+              ) : (
+                <span style={{ padding: "5px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      this.setState({ openBan: true });
+                    }}
+                    style={{
+                      backgroundColor: "red",
+                      color: "white"
+                    }}
+                  >
+                    Ban User
+                  </button>
+                  <Popup
+                    modal
+                    closeOnDocumentClick
+                    open={this.state.openBan}
+                    onClose={() => {
+                      this.setState({ openBan: false });
+                    }}
+                  >
+                    <br />
+                    <div style={{ textAlign: "center" }}>
+                      Are you sure you would like to ban this user? This action
+                      is irreversible.
+                    </div>
+                    <br />
+                    <div style={{ textAlign: "center" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          this.props.firebase.db
+                            .ref(`users/${this.props.match.params.id}/roles/`)
+                            .set({ BANNED: "BANNED" });
+
+                          this.setState({ banned: true, openBan: false });
+                        }}
+                        style={{
+                          backgroundColor: "red",
+                          color: "white"
+                        }}
+                      >
+                        Ban User
+                      </button>
+                    </div>
+                    <br />
+                  </Popup>
+                </span>
               )}
             </span>
           </div>
