@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Popup from "reactjs-popup";
 
-import styles from "./styles.css";
+import "./styles.css";
 
 import { AuthUserContext, withAuthorization } from "../Session";
 import { withFirebase } from "../Firebase";
@@ -311,3 +311,5 @@ const condition = authUser =>
 //const condition = authUser => authUser != null;
 
 export default withAuthorization(condition)(PrayerPage);
+
+export { PrayersBase, PrayerList };
