@@ -14,7 +14,6 @@ const AdminPage = () => (
   <div>
     <h1>Admin</h1>
     <p>The Admin Page is accessible by every signed in admin user.</p>
-    <PrayerRequest />
     <Switch>
       <Route exact path={ROUTES.ADMIN_DETAILS} component={UserItem} />
       <Route exact path={ROUTES.ADMIN} component={UserList} />
@@ -59,6 +58,7 @@ class UserListBase extends Component {
 
     return (
       <div>
+        <PrayerRequest />
         <h2>Users</h2>
         {loading && <div>Loading...</div>}
 
@@ -221,18 +221,19 @@ class UserItemBase extends Component {
               <strong> | Username:</strong> {user.username}
             </span>
             <span style={{ padding: "5px" }}>
-              {!this.state.approved && !this.state.banned && (
-                <button
-                  type="button"
-                  onClick={this.onApproveUser}
-                  style={{
-                    backgroundColor: "green",
-                    color: "white"
-                  }}
-                >
-                  Approve User
-                </button>
-              )}
+              {!this.state.approved &&
+                !this.state.banned && (
+                  <button
+                    type="button"
+                    onClick={this.onApproveUser}
+                    style={{
+                      backgroundColor: "green",
+                      color: "white"
+                    }}
+                  >
+                    Approve User
+                  </button>
+                )}
             </span>
             {/* <span>
               <button type="button" onClick={this.onSendPasswordResetEmail}>
@@ -372,6 +373,14 @@ class UserItemBase extends Component {
             </span>
           </div>
         )}
+        <Link
+          to={{
+            pathname: `${ROUTES.ADMIN}`
+          }}
+        >
+          {" "}
+          Back
+        </Link>
       </div>
     );
   }
