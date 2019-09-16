@@ -6,6 +6,7 @@ import { PasswordForgetForm } from "../PasswordForget";
 import PasswordChangeForm from "../PasswordChange";
 import { withAuthorization, AuthUserContext } from "../Session";
 import { tsImportEqualsDeclaration } from "@babel/types";
+import { Supports } from "../Support";
 
 const SIGN_IN_METHODS = [
   {
@@ -193,6 +194,9 @@ const AccountPage = () => (
     {authUser => (
       <div>
         <h1>Account: {authUser.email}</h1>
+
+        <h2>Send a Support Request to the Admin</h2>
+        <Supports />
         {/*} <PasswordForgetForm /> */}
         <PasswordChangeForm />
         <LoginManagement authUser={authUser} />
