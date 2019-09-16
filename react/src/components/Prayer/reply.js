@@ -110,12 +110,11 @@ class ReplyBase extends Component {
       <AuthUserContext.Consumer>
         {authUser => (
           <div>
-            {!loading &&
-              replies && (
-                <button type="button" onClick={this.onNextPage}>
-                  More
-                </button>
-              )}
+            {!loading && replies && (
+              <button type="button" onClick={this.onNextPage}>
+                More
+              </button>
+            )}
 
             {loading && <div>Loading ...</div>}
 

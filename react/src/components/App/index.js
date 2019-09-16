@@ -12,6 +12,7 @@ import AdminPage from "../Admin";
 import PermissionDenied from "../Denied";
 import PrayerPage from "../Prayer";
 import ModeratorPage from "../Moderator";
+import CalendarPage from "../Calendar";
 
 import { AuthUserContext } from "../Session";
 
@@ -35,6 +36,7 @@ const App = () => (
       <Route path={ROUTES.MODERATOR} component={ModeratorPage} />
       <Route path={ROUTES.DENIED} component={PermissionDenied} />
       <Route path={ROUTES.PRAYER} component={PrayerPage} />
+      <Route path={ROUTES.CALENDAR} component={CalendarPage} />
     </div>
   </Router>
 );
