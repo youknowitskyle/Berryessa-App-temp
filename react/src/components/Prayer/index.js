@@ -118,12 +118,11 @@ class PrayersBase extends Component {
       <AuthUserContext.Consumer>
         {authUser => (
           <div>
-            {!loading &&
-              prayers && (
-                <button type="button" onClick={this.onNextPage}>
-                  More
-                </button>
-              )}
+            {!loading && prayers && (
+              <button type="button" onClick={this.onNextPage}>
+                More
+              </button>
+            )}
 
             {loading && <div>Loading ...</div>}
 

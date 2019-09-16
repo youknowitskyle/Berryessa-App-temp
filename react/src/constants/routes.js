@@ -9,3 +9,4 @@ export const PASSWORD_FORGET = "/pw-forget";
 export const DENIED = "/permission-denied";
 export const ADMIN_DETAILS = "/admin/:id";
 export const PRAYER = "/prayer-requests";
+export const CALENDAR = "/calendar";

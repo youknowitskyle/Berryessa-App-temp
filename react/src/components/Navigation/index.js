@@ -7,19 +7,50 @@ import * as ROLES from "../../constants/roles";
 
 import { AuthUserContext } from "../Session";
 
-const Navigation = () => (
-  <div>
-    <AuthUserContext.Consumer>
-      {authUser =>
-        authUser ? (
-          <NavigationAuth authUser={authUser} />
-        ) : (
-          <NavigationNonAuth />
-        )
-      }
-    </AuthUserContext.Consumer>
-  </div>
-);
+import Menu from "../../img/menu.png";
+import Popup from "reactjs-popup";
+
+import "./styles.css";
+
+class Navigation extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { openMenu: false };
+  }
+
+  render() {
+    return (
+      <div>
+        <Popup
+          trigger={open => (
+            //add rotate on click
+            <img src={Menu} alt="navigation-menu" width="40" height="40" />
+          )}
+          position="right top"
+          closeOnDocumentClick
+        >
+          <AuthUserContext.Consumer>
+            {authUser =>
+              authUser ? (
+                <NavigationAuth authUser={authUser} />
+              ) : (
+                <NavigationNonAuth />
+              )
+            }
+          </AuthUserContext.Consumer>
+        </Popup>
+        <span className="sign-out">
+          <AuthUserContext.Consumer>
+            {authUser => {
+              return authUser && <SignOutButton />;
+            }}
+          </AuthUserContext.Consumer>
+        </span>
+      </div>
+    );
+  }
+}
 
 const NavigationAuth = ({ authUser }) => (
   <ul>
@@ -44,9 +75,6 @@ const NavigationAuth = ({ authUser }) => (
     )}
     <li>
       <Link to={ROUTES.PRAYER}>Prayer Request</Link>
-    </li>
-    <li>
-      <SignOutButton />
     </li>
   </ul>
 );
