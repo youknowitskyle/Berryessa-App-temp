@@ -13,10 +13,15 @@ import * as ROLES from "../../constants/roles";
 import * as ROUTES from "../../constants/routes";
 import "react-datepicker/dist/react-datepicker.css";
 
+import { PrayerView } from "../Prayer";
+
 const ModeratorPage = () => (
   <div>
     <h1>Moderator</h1>
     <p>The Moderator Page is accessible by every signed in moderator user.</p>
+
+    <h2>Prayer Requests</h2>
+    <PrayerView />
 
     <h2>Announcements</h2>
     <Announcements />
@@ -322,7 +327,6 @@ const condition = authUser =>
   authUser &&
   (!!authUser.roles[ROLES.MODERATOR] || !!authUser.roles[ROLES.ADMIN]);
 
-export default compose(
-  withAuthorization(condition),
-  withFirebase
-)(ModeratorPage);
+export default compose(withAuthorization(condition), withFirebase)(
+  ModeratorPage
+);

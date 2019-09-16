@@ -8,7 +8,7 @@ import { AuthUserContext, withAuthorization } from "../Session";
 import * as ROLES from "../../constants/roles";
 import * as ROUTES from "../../constants/routes";
 
-import { PrayersBase, PrayerList } from "../Prayer";
+import { SupportView } from "../Support";
 
 const AdminPage = () => (
   <div>
@@ -58,7 +58,8 @@ class UserListBase extends Component {
 
     return (
       <div>
-        <PrayerRequest />
+        <h2>Support Requests</h2>
+        <SupportView />
         <h2>Users</h2>
         {loading && <div>Loading...</div>}
 
@@ -386,53 +387,10 @@ class UserItemBase extends Component {
   }
 }
 
-class PrayerRequestBase extends PrayersBase {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const { prayers, loading } = this.state;
-
-    return (
-      <div>
-        <h2>Prayer Requests</h2>
-        <AuthUserContext.Consumer>
-          {authUser => (
-            <div>
-              {!loading &&
-                prayers && (
-                  <button type="button" onClick={this.onNextPage}>
-                    More
-                  </button>
-                )}
-
-              {loading && <div>Loading ...</div>}
-
-              {prayers ? (
-                <PrayerList
-                  authUser={authUser}
-                  prayers={prayers}
-                  onEditPrayer={this.onEditPrayer}
-                  onRemovePrayer={this.onRemovePrayer}
-                />
-              ) : (
-                <div>There are no prayer requests ...</div>
-              )}
-            </div>
-          )}
-        </AuthUserContext.Consumer>
-      </div>
-    );
-  }
-}
-
 const condition = authUser => authUser && !!authUser.roles[ROLES.ADMIN];
 
 const UserList = withFirebase(UserListBase);
 const UserItem = withFirebase(UserItemBase);
-
-const PrayerRequest = withFirebase(PrayerRequestBase);
 
 /*const UserItem = ({ match }) => (
   <div>

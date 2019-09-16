@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Popup from "reactjs-popup";
 
-import "./styles.css";
+import "../Prayer/styles.css";
 
 import { AuthUserContext, withAuthorization } from "../Session";
 import { withFirebase } from "../Firebase";
@@ -9,15 +9,15 @@ import Replies from "./reply";
 
 import * as ROLES from "../../constants/roles";
 
-const PrayerPage = () => (
+const SupportPage = () => (
   <div>
-    <h1>Prayer Requests</h1>
-    <p>If you need prayer for anything, please submit your request below.</p>
-    <Prayers />
+    <h1>Support Requests</h1>
+    <p>If you need support for anything, please submit your request below.</p>
+    <Supports />
   </div>
 );
 
-class PrayersBase extends Component {
+class SupportsBase extends Component {
   constructor(props) {
     super(props);
 
@@ -25,45 +25,45 @@ class PrayersBase extends Component {
       text: "",
       isAnonymous: false,
       loading: false,
-      prayers: [],
+      supports: [],
       limit: 5,
       reply: null //becomes id of message
     };
   }
 
   componentDidMount() {
-    this.onListenForPrayers();
+    this.onListenForSupports();
   }
 
-  onListenForPrayers() {
+  onListenForSupports() {
     this.setState({ loading: true });
 
     this.props.firebase
-      .prayers()
+      .supports()
       .orderByChild("createdAt")
       .limitToLast(this.state.limit)
       .on("value", snapshot => {
-        const prayerObject = snapshot.val();
+        const supportObject = snapshot.val();
 
-        if (prayerObject) {
-          const prayerList = Object.keys(prayerObject).map(key => ({
-            ...prayerObject[key],
+        if (supportObject) {
+          const supportList = Object.keys(supportObject).map(key => ({
+            ...supportObject[key],
             uid: key
           }));
-          // convert prayers list from snapshot
+          // convert supports list from snapshot
 
           this.setState({
-            prayers: prayerList,
+            supports: supportList,
             loading: false
           });
         } else {
-          this.setState({ prayers: null, loading: false });
+          this.setState({ supports: null, loading: false });
         }
       });
   }
 
   componentWillUnmount() {
-    this.props.firebase.prayers().off();
+    this.props.firebase.supports().off();
   }
 
   onChangeText = event => {
@@ -74,8 +74,8 @@ class PrayersBase extends Component {
     this.setState({ [event.target.name]: event.target.checked });
   };
 
-  onCreatePrayer = (event, authUser) => {
-    this.props.firebase.prayers().push({
+  onCreateSupport = (event, authUser) => {
+    this.props.firebase.supports().push({
       text: this.state.text,
       userId: authUser.uid,
       username: authUser.username,
@@ -88,29 +88,29 @@ class PrayersBase extends Component {
     event.preventDefault();
   };
 
-  onEditPrayer = (prayer, text) => {
-    const { uid, ...prayerSnapshot } = prayer;
+  onEditSupport = (support, text) => {
+    const { uid, ...supportSnapshot } = support;
 
-    this.props.firebase.prayer(prayer.uid).set({
-      ...prayerSnapshot,
+    this.props.firebase.support(support.uid).set({
+      ...supportSnapshot,
       text,
       editedAt: this.props.firebase.serverValue.TIMESTAMP
     });
   };
 
-  onRemovePrayer = uid => {
-    this.props.firebase.prayer(uid).remove();
+  onRemoveSupport = uid => {
+    this.props.firebase.support(uid).remove();
   };
 
   onNextPage = () => {
     this.setState(
       state => ({ limit: state.limit + 5 }),
-      this.onListenForPrayers
+      this.onListenForSupports
     );
   };
 
   render() {
-    const { text, isAnonymous, prayers, loading } = this.state;
+    const { text, isAnonymous, supports, loading } = this.state;
 
     const isInvalid = text === "";
 
@@ -118,32 +118,33 @@ class PrayersBase extends Component {
       <AuthUserContext.Consumer>
         {authUser => (
           <div>
-            {!loading && prayers && (
-              <button type="button" onClick={this.onNextPage}>
-                More
-              </button>
-            )}
+            {!loading &&
+              supports && (
+                <button type="button" onClick={this.onNextPage}>
+                  More
+                </button>
+              )}
 
             {loading && <div>Loading ...</div>}
 
-            {prayers ? (
-              <PrayerList
+            {supports ? (
+              <SupportList
                 authUser={authUser}
-                prayers={prayers}
-                onEditPrayer={this.onEditPrayer}
-                onRemovePrayer={this.onRemovePrayer}
+                supports={supports}
+                onEditSupport={this.onEditSupport}
+                onRemoveSupport={this.onRemoveSupport}
               />
             ) : (
-              <div>There are no prayer requests ...</div>
+              <div>There are no support requests ...</div>
             )}
 
-            <form onSubmit={event => this.onCreatePrayer(event, authUser)}>
+            <form onSubmit={event => this.onCreateSupport(event, authUser)}>
               <input
-                name="prayer"
+                name="support"
                 type="text"
                 value={text}
                 onChange={this.onChangeText}
-                placeholder="Send a prayer request..."
+                placeholder="Send a support request..."
               />
               <label>
                 Send Anonymously:{" "}
@@ -165,39 +166,44 @@ class PrayersBase extends Component {
   }
 }
 
-const PrayerList = ({ authUser, prayers, onEditPrayer, onRemovePrayer }) => (
+const SupportList = ({
+  authUser,
+  supports,
+  onEditSupport,
+  onRemoveSupport
+}) => (
   <ul>
-    {prayers.map(
-      prayer =>
-        (authUser.uid === prayer.userId ||
+    {supports.map(
+      support =>
+        (authUser.uid === support.userId ||
           !!authUser.roles[ROLES.ADMIN] ||
           !!authUser.roles[ROLES.MODERATOR]) && (
-          <PrayerItem
+          <SupportItem
             authUser={authUser}
-            key={prayer.uid}
-            prayer={prayer}
-            onEditPrayer={onEditPrayer}
-            onRemovePrayer={onRemovePrayer}
+            key={support.uid}
+            support={support}
+            onEditSupport={onEditSupport}
+            onRemoveSupport={onRemoveSupport}
           />
         )
     )}
   </ul>
 );
 
-class PrayerItem extends Component {
+class SupportItem extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       editMode: false,
-      editText: this.props.prayer.text
+      editText: this.props.support.text
     };
   }
 
   onToggleEditMode = () => {
     this.setState(state => ({
       editMode: !state.editMode,
-      editText: this.props.prayer.text
+      editText: this.props.support.text
     }));
   };
 
@@ -206,13 +212,13 @@ class PrayerItem extends Component {
   };
 
   onSaveEditText = () => {
-    this.props.onEditPrayer(this.props.prayer, this.state.editText);
+    this.props.onEditSupport(this.props.support, this.state.editText);
 
     this.setState({ editMode: false });
   };
 
   render() {
-    const { authUser, prayer, onRemovePrayer } = this.props;
+    const { authUser, support, onRemoveSupport } = this.props;
     const { editMode, editText } = this.state;
 
     const isInvalid = editText === "";
@@ -228,13 +234,13 @@ class PrayerItem extends Component {
         ) : (
           <span>
             <strong>
-              {prayer.isAnonymous ? "Anonymous" : prayer.username}:{" "}
+              {support.isAnonymous ? "Anonymous" : support.username}:{" "}
             </strong>
-            {prayer.text}
-            {prayer.editedAt && <span>(Edited)</span>}
+            {support.text}
+            {support.editedAt && <span>(Edited)</span>}
           </span>
         )}
-        {authUser.uid === prayer.userId && (
+        {authUser.uid === support.userId && (
           <Popup
             trigger={open => (
               <button className="button">{open ? "Close" : ":"}</button>
@@ -272,7 +278,7 @@ class PrayerItem extends Component {
                 <button
                   className="menu-item"
                   type="button"
-                  onClick={() => onRemovePrayer(prayer.uid)}
+                  onClick={() => onRemoveSupport(support.uid)}
                 >
                   Delete
                 </button>
@@ -287,10 +293,10 @@ class PrayerItem extends Component {
         >
           <div>
             <span>
-              User: {prayer.isAnonymous ? "Anonymous" : prayer.username}
+              User: {support.isAnonymous ? "Anonymous" : support.username}
             </span>
-            <h1>{prayer.text}</h1>
-            <Replies prayer={prayer} />
+            <h1>{support.text}</h1>
+            <Replies support={support} />
           </div>
         </Popup>
       </li>
@@ -298,13 +304,13 @@ class PrayerItem extends Component {
   }
 }
 
-class PrayerViewBase extends PrayersBase {
+class SupportViewBase extends SupportsBase {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const { prayers, loading } = this.state;
+    const { supports, loading } = this.state;
 
     return (
       <div>
@@ -312,7 +318,7 @@ class PrayerViewBase extends PrayersBase {
           {authUser => (
             <div>
               {!loading &&
-                prayers && (
+                supports && (
                   <button type="button" onClick={this.onNextPage}>
                     More
                   </button>
@@ -320,15 +326,15 @@ class PrayerViewBase extends PrayersBase {
 
               {loading && <div>Loading ...</div>}
 
-              {prayers ? (
-                <PrayerList
+              {supports ? (
+                <SupportList
                   authUser={authUser}
-                  prayers={prayers}
-                  onEditPrayer={this.onEditPrayer}
-                  onRemovePrayer={this.onRemovePrayer}
+                  supports={supports}
+                  onEditSupport={this.onEditSupport}
+                  onRemoveSupport={this.onRemoveSupport}
                 />
               ) : (
-                <div>There are no prayer requests ...</div>
+                <div>There are no support requests ...</div>
               )}
             </div>
           )}
@@ -338,8 +344,8 @@ class PrayerViewBase extends PrayersBase {
   }
 }
 
-const Prayers = withFirebase(PrayersBase);
-const PrayerView = withFirebase(PrayerViewBase);
+const Supports = withFirebase(SupportsBase);
+const SupportView = withFirebase(SupportViewBase);
 
 const condition = authUser =>
   !!authUser &&
@@ -350,6 +356,6 @@ const condition = authUser =>
 //or equivalently:
 //const condition = authUser => authUser != null;
 
-export default withAuthorization(condition)(PrayerPage);
+export default withAuthorization(condition)(SupportPage);
 
-export { PrayerView };
+export { SupportView, Supports };
