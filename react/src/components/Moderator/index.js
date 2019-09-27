@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import { compose } from "recompose";
 import DatePicker from "react-datepicker";
-
 import { withFirebase } from "../Firebase";
 import {
   AuthUserContext,
@@ -11,6 +10,7 @@ import {
 } from "../Session";
 import * as ROLES from "../../constants/roles";
 import * as ROUTES from "../../constants/routes";
+
 import "react-datepicker/dist/react-datepicker.css";
 
 import { PrayerView } from "../Prayer";
@@ -327,6 +327,7 @@ const condition = authUser =>
   authUser &&
   (!!authUser.roles[ROLES.MODERATOR] || !!authUser.roles[ROLES.ADMIN]);
 
-export default compose(withAuthorization(condition), withFirebase)(
-  ModeratorPage
-);
+export default compose(
+  withAuthorization(condition),
+  withFirebase
+)(ModeratorPage);

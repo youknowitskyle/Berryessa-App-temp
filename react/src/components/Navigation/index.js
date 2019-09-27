@@ -23,10 +23,12 @@ class Navigation extends React.Component {
     return (
       <div>
         <Popup
-          trigger={open => (
-            //add rotate on click
-            <img src={Menu} alt="navigation-menu" width="40" height="40" />
-          )}
+          trigger={open => {
+            return (
+              //add rotate on click
+              <img src={Menu} alt="navigation-menu" width="40" height="40" />
+            );
+          }}
           position="right top"
           closeOnDocumentClick
         >
@@ -74,7 +76,10 @@ const NavigationAuth = ({ authUser }) => (
       </li>
     )}
     <li>
-      <Link to={ROUTES.PRAYER}>Prayer Request</Link>
+      <Link to={ROUTES.PRAYER}>Prayer Requests</Link>
+    </li>
+    <li>
+      <Link to={ROUTES.CALENDAR}>Calendar</Link>
     </li>
   </ul>
 );

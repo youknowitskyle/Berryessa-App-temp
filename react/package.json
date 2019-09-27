@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@culturehq/add-to-calendar": "^1.0.4",
     "bootstrap": "^4.3.1",
     "firebase": "^6.2.4",
     "react": "^16.9.0",
+    "react-add-to-calendar": "^0.1.5",
     "react-big-calendar": "^0.22.1",
     "react-datepicker": "^2.9.6",
     "react-dom": "^16.8.6",

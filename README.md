@@ -1,5 +1,4 @@
-
-﻿This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Project Dependencies
 
@@ -8,6 +7,13 @@ Node Package Management or Yarn
 react
 recompose
 firebase
+add-to-calendar
+reactjs-popup
+superagent
+moment
+react-big-calendar
+@culturehq/add-to-
+react-add-to-calendar
 
 # Berryessa App
 
@@ -15,7 +21,7 @@ Berryessa App is a web app created with React and Firebase for scheduling, manag
 
 ## Installation
 
-This is a standard React application. Install [`Node.js`](https://nodejs.org/) and [`npm`](https://nodejs.org/). In the 'react' folder, run 
+This is a standard React application. Install [`Node.js`](https://nodejs.org/) and [`npm`](https://nodejs.org/). In the 'react' folder, run
 
 ```bash
 npm run start
@@ -26,6 +32,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 More React documentation is included below.
 
 ## Contributing
+
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
@@ -96,6 +103,5 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
-
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

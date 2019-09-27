@@ -41,7 +41,7 @@ class SignUpFormBase extends Component {
   onSubmit = event => {
     const { username, email, passwordOne, isParent } = this.state;
 
-    const roles = {};
+    const roles = { PLACEHOLDER: "PLACEHOLDER" };
 
     if (isParent) {
       roles[ROLES.PARENT] = ROLES.PARENT;
