@@ -15,8 +15,25 @@ const HomePage = () => (
     <h1>Home Page</h1>
     <p>You are authenticated.</p>
 
-    <Messages />
-
+    <AuthUserContext.Consumer>
+      {authUser => (
+        <div>
+          {authUser.roles[ROLES.APPROVED] &&
+          !authUser.roles[ROLES.PROBATION] ? (
+            <div>
+              <h2>Chat</h2>
+              <Messages />
+            </div>
+          ) : (
+            <div>
+              You are not allowed to send or view messages. Please contact an
+              administrator to get approved. If you think you have been
+              approved, try logging out and signing back in.
+            </div>
+          )}
+        </div>
+      )}
+    </AuthUserContext.Consumer>
     <br />
 
     <AuthUserContext.Consumer>

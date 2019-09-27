@@ -97,7 +97,7 @@ class UserListBase extends Component {
                   <span style={{ color: "green" }}>TRUE</span>
                 ) : (
                   <span style={{ color: "red" }}>FALSE</span>
-                )}
+                )}{" "}
               </span>
               <span>
                 <Link
@@ -106,7 +106,6 @@ class UserListBase extends Component {
                     state: { user }
                   }}
                 >
-                  {" "}
                   Details
                 </Link>
               </span>
@@ -222,19 +221,18 @@ class UserItemBase extends Component {
               <strong> | Username:</strong> {user.username}
             </span>
             <span style={{ padding: "5px" }}>
-              {!this.state.approved &&
-                !this.state.banned && (
-                  <button
-                    type="button"
-                    onClick={this.onApproveUser}
-                    style={{
-                      backgroundColor: "green",
-                      color: "white"
-                    }}
-                  >
-                    Approve User
-                  </button>
-                )}
+              {!this.state.approved && !this.state.banned && (
+                <button
+                  type="button"
+                  onClick={this.onApproveUser}
+                  style={{
+                    backgroundColor: "green",
+                    color: "white"
+                  }}
+                >
+                  Approve User
+                </button>
+              )}
             </span>
             {/* <span>
               <button type="button" onClick={this.onSendPasswordResetEmail}>
@@ -398,4 +396,7 @@ const UserItem = withFirebase(UserItemBase);
   </div>
 );*/
 
-export default compose(withAuthorization(condition), withFirebase)(AdminPage);
+export default compose(
+  withAuthorization(condition),
+  withFirebase
+)(AdminPage);

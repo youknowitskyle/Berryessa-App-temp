@@ -103,7 +103,10 @@ class CalendarPageBase extends Component {
   }
 }
 
-const condition = authUser => !!authUser && !!ROLES.APPROVED;
+const condition = authUser =>
+  !!authUser &&
+  !!authUser.roles[ROLES.APPROVED] &&
+  !authUser.roles[ROLES.PROBATION];
 
 const CalendarPage = withAuthorization(condition)(CalendarPageBase);
 
