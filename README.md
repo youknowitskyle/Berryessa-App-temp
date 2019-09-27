@@ -1,20 +1,3 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Project Dependencies
-
-Node Package Management or Yarn
-
-react
-recompose
-firebase
-add-to-calendar
-reactjs-popup
-superagent
-moment
-react-big-calendar
-@culturehq/add-to-
-react-add-to-calendar
-
 # Berryessa App
 
 Berryessa App is a web app created with React and Firebase for scheduling, managing, and communicating in ROLCC youth cell groups.
@@ -30,6 +13,21 @@ npm run start
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 More React documentation is included below.
+
+## Project Dependencies
+
+Node Package Management or Yarn
+
+react
+recompose
+firebase
+add-to-calendar
+reactjs-popup
+superagent
+moment
+react-big-calendar
+@culturehq/add-to-
+react-add-to-calendar
 
 ## Contributing
 
