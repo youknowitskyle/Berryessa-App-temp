@@ -14,4 +14,4 @@ reactjs-popup\
 superagent\
 moment\
 react-big-calendar\
-react-add-to-calendar\
+react-add-to-calendar
